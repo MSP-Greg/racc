@@ -41,7 +41,7 @@ module Racc
         "#{ASSET_DIR}/#{file}.y",
         "-o#{TAB_DIR}/#{file}",
       ]
-      racc "#{args.join(' ')}", expect_success
+      racc "#{args.join(' ')}", file, expect_success
     end
 
     def assert_error(asset, args = '')
@@ -64,7 +64,7 @@ module Racc
     def assert_exec(asset, embedded_runtime = false)
       file = File.basename(asset, '.y')
       Dir.chdir(PROJECT_DIR) do
-        ruby("#{TAB_DIR}/#{file}", true, !embedded_runtime)
+        ruby("#{TAB_DIR}/#{file}", file, true, !embedded_runtime)
       end
     end
 
@@ -92,18 +92,21 @@ module Racc
       end
     end
 
-    def racc(arg, expect_success = true)
-      ruby "#{RACC} #{arg}", expect_success
+    def racc(arg, file, expect_success = true)
+      ruby "#{RACC} #{arg}", file, expect_success
     end
 
-    def ruby(arg, expect_success = true, load_racc = true)
+    def ruby(arg, file, expect_success = true, load_racc = true)
       err = ''
       result = nil
       Dir.chdir(PROJECT_DIR) do
         o, err, s = Open3.capture3 "#{ruby_executable} #{arg}"
         result = s.success?
       end
-      assert(result, err) if expect_success
+      if expect_success
+        assert(result, err)
+        assert(File.exist?("./#{TAB_DIR}/#{file}"), "no file")
+      end
       return err
     end
 
