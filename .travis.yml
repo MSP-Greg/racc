@@ -18,7 +18,8 @@ matrix:
     - rvm: ruby-head
     - rvm: jruby-9.2.7.0
 
-before_install: gem update --system -N
+before_install:
+  - gem update --system -N
 
 install:
   - bundle install --retry 3
