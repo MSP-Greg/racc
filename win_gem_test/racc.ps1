@@ -30,6 +30,7 @@ Make-Const write_so_require $true
 function Pre-Compile {
   $rb_fn = "$dir_gem/lib/racc/grammar_file_scanner.rb"
   if( !(Test-Path -Path $rb_fn -PathType Leaf) ) {
+    Package-MSYS2('ragel')
     ragel.exe -F1 -R -o $rb_fn $dir_gem/lib/racc/grammar_file_scanner.rl
   }
 }
