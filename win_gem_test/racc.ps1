@@ -13,7 +13,7 @@ Make-Const repo_name 'racc'
 Make-Const url_repo  'https://github.com/ruby/racc.git'
 
 #———————————————————————————————————————————————————————————————— lowest ruby version
-Make-Const ruby_vers_low 22
+Make-Const ruby_vers_low 24
 # null = don't compile; false = compile, ignore test (allow failure);
 # true = compile & test
 Make-Const trunk     $false ; Make-Const trunk_x64     $false
@@ -28,7 +28,10 @@ Make-Const write_so_require $true
 
 #———————————————————————————————————————————————————————————————— pre compile
 function Pre-Compile {
-#  ragel.exe -F1 -R -o $dir_gem/lib/racc/grammar_file_scanner.rb $dir_gem/lib/racc/grammar_file_scanner.rl
+  $rb_fn = "$dir_gem/lib/racc/grammar_file_scanner.rb"
+  if( !(Test-Path -Path $rb_fn -PathType Leaf) ) {
+    ragel.exe -F1 -R -o $rb_fn $dir_gem/lib/racc/grammar_file_scanner.rl
+  }
 }
 
 #———————————————————————————————————————————————————————————————— Run-Tests
@@ -36,7 +39,7 @@ function Run-Tests {
   # call with comma separated list of gems to install or update
   Update-Gems minitest, minitest-retry, rake
   $env:CI = 1
-  rake -f Rakefile_wintest -N -R norakelib | Set-Content -Path $log_name -PassThru -Encoding UTF8
+  rake -f Rakefile_wintest -N -R norakelib TESTOPTS='-v --no-plugins' | Set-Content -Path $log_name -PassThru -Encoding UTF8
   # add info after test results
   minitest  # collects test results
 }
