@@ -10,6 +10,7 @@ require 'racc/parser_file_generator'
 require 'fileutils'
 require 'tempfile'
 require 'timeout'
+require 'open3'
 
 module Racc
   class TestCase < Minitest::Test
@@ -96,16 +97,14 @@ module Racc
     end
 
     def ruby(arg, expect_success = true, load_racc = true)
+      err = ''
+      result = nil
       Dir.chdir(PROJECT_DIR) do
-        Tempfile.open('test') do |io|
-          arg = "-I #{INC} #{arg}" if load_racc
-          result = system("#{ruby_executable} #{arg} 2>#{io.path}")
-          io.flush
-          err = io.read
-          assert(result, err) if expect_success
-          return err
-        end
+        o, err, s = Open3.capture3 "#{ruby_executable} #{arg}"
+        result = s.success?
       end
+      assert(result, err) if expect_success
+      return err
     end
 
     def ruby_executable
